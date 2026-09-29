@@ -1,5 +1,5 @@
 # Post Code Change Verification Hook (PowerShell)
-# Runs the mandatory post-change verification workflow from CLAUDE.md
+# Runs the mandatory post-change verification workflow from AGENTS.md
 
 $ErrorActionPreference = "Stop"
 

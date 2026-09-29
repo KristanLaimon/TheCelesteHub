@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Trimmed real example from `Celeste/Saves/0.celeste` (Windows Steam path, but same
-  format/name no matter the OS, see GEMINI.md "Celeste installation"). This is a plain
+  format/name no matter the OS, see AGENTS.md "Celeste installation"). This is a plain
   XML file despite the .celeste extension, one per save slot (0.celeste, 1.celeste, ...).
 
   This single file is the source for BOTH halves of "Vanilla + Mods (ever played) total

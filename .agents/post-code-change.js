@@ -1,5 +1,5 @@
 // Post Code Change Verification Hook (Bun / Node.js)
-// Runs the mandatory post-change verification workflow from CLAUDE.md
+// Runs the mandatory post-change verification workflow from AGENTS.md
 
 import { spawnSync } from "node:child_process";
 

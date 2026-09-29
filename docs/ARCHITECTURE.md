@@ -1,6 +1,6 @@
 # Architecture
 
-Quick map of how the pieces wire together. For business rules (Celeste domain specifics, mod support, statistics indexing), see `CLAUDE.md`. This file is structural only.
+Quick map of how the pieces wire together. For business rules (Celeste domain specifics, mod support, statistics indexing), see `AGENTS.md`. This file is structural only.
 
 ## Two DI composition roots
 
@@ -49,7 +49,7 @@ Callers never touch these sub-managers or the `Storage` instances directly — o
 | `src/domain/` | Core business logic: `Everest*.ts` (mod-scanning), `Olympus.ts`, `Celeste.ts`, `Configuration.ts`, `LocalMods.ts` + `domain/localmods/*` (see above). Universal-compatibility only — no browser/Neutralino imports. |
 | `src/libs/` | Generic, Celeste-agnostic libraries meant to be standalone-publishable: `Wanvas/` (pan/zoom canvas widget system) and `GoldenLayoutThemes/` (Svelte wrapper/theming for `golden-layout`). |
 | `src/pages/` | Route/pane components. `src/pages/panes/` holds what `NewPage.pageselector.svelte` can add as a golden-layout pane (`ModsSearch`, `ModView`, etc.); `src/pages/Main.svelte` hosts them. |
-| `src/stores/` | Svelte 5 `$state`-based global stores (`*.store.svelte.ts`), self-initializing singletons — see `CLAUDE.md`'s "Global Svelte 5 Store Pattern". |
+| `src/stores/` | Svelte 5 `$state`-based global stores (`*.store.svelte.ts`), self-initializing singletons — see `AGENTS.md`'s "Global Svelte 5 Store Pattern". |
 | `src/utils/` | Cross-cutting, domain-free helpers: `Storage.ts`/`Storage.json.ts`/`Storage.localStorage.ts`, `Logger.ts`, `AsyncLazy.ts`, `Hotkeys.ts`, `StringSimilarity.ts`. |
 
 Entry point: `src/index.ts` → `neutralino.init()` → mounts `Loading.svelte` → waits for `ready` → ensures `./data` exists → `Configuration.initialize()` → mounts `src/index.svelte` (router outlet + `CommandCenter`).

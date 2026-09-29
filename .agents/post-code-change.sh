@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Post Code Change Verification Hook (Bash/Sh)
-# Runs the mandatory post-change verification workflow from CLAUDE.md
+# Runs the mandatory post-change verification workflow from AGENTS.md
 
 set -e
 

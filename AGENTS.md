@@ -1,25 +1,50 @@
-# CLAUDE.md
+# AGENTS.md
 
 TheCelesteTracker Desktop
 
 TheCelesteTracker Desktop is *the* desktop all-in-one companion for Celeste PC Players (Modded and Vanilla players), the place-to-go to see all its local celeste info and stats.
 
+# Rules & Verification
+
+## Mandatory Agent Rules
+- Always execute `bun run check` synchronously (never in background) after making changes to `.ts` or `.svelte` files, inspect the output, and fix any type/compilation errors immediately.
+- **API Design (Options Object Pattern)**: Never use raw positional boolean flags as parameters in function/method signatures (e.g. `get(forceRefresh?: boolean)`). Always use a named options object parameter (e.g. `get(opts?: { forceRefresh?: boolean })`) for self-documenting, extensible code.
+- **Global Svelte 5 Store Pattern (`*.store.svelte.ts`)**: Encapsulated unexported store class in `*.store.svelte.ts` that self-initializes in constructor (`GetDependency(...)`), uses `$state` fields & `PascalCase` mutation methods, and exports default instance (`const store = new Store(); export default store;`). Outside UI components MUST NOT initialize global stores; they only consume getters/setters.
+
+## Post-Flow Verification Commands
+After implementing changes, run the following verification flow sequentially:
+```bash
+1. bun test                   # run all tests (Bun test runner, files in testing/*.test.ts)
+2. bun run check              # svelte-check + tsc type checking
+3. bun run lint:fix           # biome check . --write --unsafe auto-fixes
+4. bun run check              # verify lint:fix didn't break types
+```
+
+## Second-Brain Workflow
+- **Business rules**: Celeste domain facts, save file shapes, mod structure, architecture. Fold directly into `AGENTS.md`.
+- **Process & tooling learnings**: Process learnings, environment gotchas, dead ends. Add as numbered files under `.agents/brain/NN-name.md` (see [01-second-brain-convention.md](.agents/brain/01-second-brain-convention.md)).
+- After completing non-trivial tasks:
+  1. Record durable business rules in `AGENTS.md`.
+  2. Record process/meta learnings as a new numbered thought file in `.agents/brain/`.
+
+---
+
 # Features & Roadmap
-For the detailed roadmap of pending features to implement, see [TODO.md](.claude/TODO.md).
+For the detailed roadmap of pending features to implement, see [TODO.md](.agents/TODO.md).
 
 # Architecture
 For a structural map of how modules/DI/storage/Go-CLI helpers wire together, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 # Second Brain (IMPORTANT)
-Non-business-rule learnings (process, tooling gotchas, dead ends) live as numbered `.claude/brain/NN-name.md` thought files, not here. This file stays business-rules-only. See `.claude/brain/01-second-brain-convention.md` for the workflow.
+Non-business-rule learnings (process, tooling gotchas, dead ends) live as numbered `.agents/brain/NN-name.md` thought files, not here. This file stays business-rules-only. See [01-second-brain-convention.md](.agents/brain/01-second-brain-convention.md) for the workflow.
 
 
 # TOKEN AND PERFORMANCE MANDATORY FLOWS
 1. JSON Reading
   WHEN READING JSONS, FIRST COUNT THE NUMBER OF LINES THEY HAVE, if they have more than 1k lines, parse them using internal node.js json, read keys only and a little bit of each KEY values...  (to save TOKENS)
 
-# Design.md
-In case of creation of NEW SVELTE components LAZY-LOAD ONLY WHEN NEEDED the css colors style values in [Index CSS](./index.css) and [Design.md](.claude/DESIGN.md)
+# Design Specification
+In case of creation of NEW SVELTE components LAZY-LOAD ONLY WHEN NEEDED the css colors style values in [Index CSS](./index.css) and [DESIGN.md](.agents/DESIGN.md).
 
 # Custom Generic Libraries & Encapsulation
 For unique features, custom generic libraries are encapsulated cleanly from the Celeste domain logic (so they could be published as standalone npm packages with generic public APIs):
@@ -55,22 +80,22 @@ installed, we need to handle it and show msg to user (any way, that, if the want
 ## Celeste installation
 Celeste installation normally is found in:
 - Windows: 
-  - Stream Version Path: C:\Program Files (x86)\Steam\steamapps\common\Celeste\ for Steam or 
-  - Microsoft Store version: %LOCALAPPDATA%\Packages\MattMakesGamesInc.Celeste_79daxvg0dq3v6\. (If installed from microsoft version, theres no mod support, so only celeste-vanilla content showing).
-- MacOS: ~/Library/Application Support/Celeste/
+  - Steam Version Path: `C:\Program Files (x86)\Steam\steamapps\common\Celeste\` for Steam or 
+  - Microsoft Store version: `%LOCALAPPDATA%\Packages\MattMakesGamesInc.Celeste_79daxvg0dq3v6\`. (If installed from microsoft version, theres no mod support, so only celeste-vanilla content showing).
+- MacOS: `~/Library/Application Support/Celeste/`
 - Linux: Could be located in 
-  - If-Non-Steam-Version Path: ~/.local/share/Celeste/
-  - Steam Version Path:, they're typically found in ~/.local/share/Steam/steamapps/common/Celeste/.Save 
-  - Flatpak Stream Path: ~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Celeste/
+  - If-Non-Steam-Version Path: `~/.local/share/Celeste/`
+  - Steam Version Path: `~/.local/share/Steam/steamapps/common/Celeste/.Save`
+  - Flatpak Steam Path: `~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Celeste/`
 
-Celeste saves the vanilla stats in /Saves or .Save folder (depending in OS)
+Celeste saves the vanilla stats in `/Saves` or `.Save` folder (depending in OS).
 
 In this dev environment: My celeste is installed in `C:\Program Files (x86)\Steam\steamapps\common\Celeste\`, take advantage of this to 
 scrap by yourself if errors if you need it.
 
 ## Mod Indexing Sources:
 On first startup or with manual user trigger, the scan is made with the following, ALWAYS doing local caching in
-app resources folder ResourcesFolder/cache folder, to avoid re-scannings. 
+app resources folder `ResourcesFolder/cache` folder, to avoid re-scannings. 
   - Offline methods (always used): 
     No internet required, but they provide the most basic info, used as internal CORE-Information but almost never showed as-is in
     frontend due to lack of pretty-metadata like screenshots, author info, description ,etc.. . Only very core-basic info, detailed in the following points:
@@ -162,12 +187,12 @@ app resources folder ResourcesFolder/cache folder, to avoid re-scannings.
 
   Offline:
   1.  Only Last Save Total Snapshot (Without history-stats-backtracking) `ALWAYS AVAILABLE`: 
-    Mod metadata offline available vanilla only (Very basic and only static final stats, not through time) -> this are found in C:\Program Files (x86)\Steam\steamapps\common\Celeste\Saves *Celeste\Saves* folder (no matter the OS), and is a collection of .celeste files that in reality are .XML files with all the metadata.
+    Mod metadata offline available vanilla only (Very basic and only static final stats, not through time) -> this are found in `C:\Program Files (x86)\Steam\steamapps\common\Celeste\Saves` *Celeste\Saves* folder (no matter the OS), and is a collection of .celeste files that in reality are .XML files with all the metadata.
       - SPECIFICS:
         - Its one `N.celeste` file per save slot (0.celeste, 1.celeste, ...), and BOTH halves of "vanilla + mods ever played" live in that SAME file: vanilla campaign totals at the top (TotalDeaths, TotalStrawberries, TotalDashes, etc + per-chapter `<Areas>`), then every mod campaign ever played under `<LevelSets>` (still installed) or `<LevelSetRecycleBin>` (uninstalled since, stats kept, this is the "ever played" part). The `N-modsave-*.celeste` files (one per mod) are NOT for totals, thats per-mod extra data (flags, blacklists, in-progress session), not needed for this stats section.
         - LAZY-LOAD IF NEEDED a real trimmed example (actual field names/shape, from my own save) in `./docs/TheCelesteDesktop/SaveFile_VanillaAndModsTotalStats_Example.xml`, TL;DR: top-level `<TotalDeaths>`/`<TotalStrawberries>`/`<TotalDashes>`/etc are vanilla-only, mod totals gotta be summed by hand from `<LevelSetStats Name="...">` blocks (each has its own `<UnlockedAreas>`/`<TotalStrawberries>`/`<Areas>` with per-map `<AreaStats>`/`<AreaModeStats>` for deaths/time/best-time per side).
 
-  2.  Stats through time, dynamically updated in real time when playing. (With History-Stats-Backtracking) `COULD O COULD NOT BE AVAILABLE`:
+  2.  Stats through time, dynamically updated in real time when playing. (With History-Stats-Backtracking) `COULD OR COULD NOT BE AVAILABLE`:
           Theres a dependency mod created by me (KristanLaimon) called `The Celeste Tracker Mod`
                         (*https://github.com/KristanLaimon/TheCelesteTracker-Mod*)
       Features
@@ -185,21 +210,20 @@ app resources folder ResourcesFolder/cache folder, to avoid re-scannings.
 
       Backups
       If db is available:
-        1. We copy it (only if newer, use hashing) into this proyect resources /backup folder.
+        1. We copy it (only if newer, use hashing) into this project resources /backup folder.
         2. We always use the Celeste/saves folder db to query the through time metadata.
       If db is not available in */Celeste/Saves/ folder && we have backup folder:
         1. We copy the last /backup database into *Celeste/Saves
         2. We always use the Celeste/save folder db to make our queries.
       If db is not available in #/Celeste/Saves/ folder && we do not have backup folder:
         1. We ask user to <optionally> install it, 2 ways:
-          1.1 Manual install (giver full instructions in modal window or something) with steps to download it from github releases
+          1.1 Manual install (give full instructions in modal window or something) with steps to download it from github releases
           1.2 Automatic install (this app downloads it from github releases and put it in /Celeste/Mods folder) then ask to start celeste once, to initialize the db. (this app should be able to detect it in creation with a fileWatcher, only if user decided to install this, if cancels, stop the fileWatcher)
 
 Player has one or more datasaves; a datasave tracks progress per campaign (vanilla Celeste counts as one campaign/mod). Campaign has 1..n chapters; collab-style mods (built on Collab Utils 2 — see `Collab Utils 2.docs.md`) additionally nest lobbies containing chapters. Vanilla static stats come from `.celeste` XML save files under Celeste's `Saves/` folder. Live/real-time stats (deaths, dashes, transitions per run) come from the companion mod [TheCelesteTracker-Mod](https://github.com/KristanLaimon/TheCelesteTracker-Mod), which writes its own SQLite DB into Celeste's `Saves/` folder and streams events over WebSocket (port 50500, scanning up to 50600) — this app reads/copies that DB rather than re-implementing tracking.
 
 Reference docs worth checking before touching mod-parsing code: `docs/Database_TheCelesteDesktop.md` (schema), `docs/features/*.md` (feature specs), `Everest.docs.md`, `Collab Utils 2.docs.md`, `Alt Sides Helper.docs.md`, `docs/TheCelesteDesktop/CelesteMapBin_Format.md` (map `.bin` BinaryPacker layout — the only source of collectible *maximums*, since saves record only what was collected) and `docs/TheCelesteDesktop/CelesteMapBin_Quirks_And_ModPatterns.md` (what real mods put in their maps: entity-name census, deny list, trailing-byte quirk).
 
--- HERE FINISHED MY HUMAN WRITING DO NOT MODIFY ANY PREVIOUS TEXT, ONLY FROM HERE FORWARD --
 ## Celeste Mod Domain
 ### Map `.bin` → PNG Rendering
 Map `.bin` files can be parsed to extract room bounds (`level` x, y, width, height), solids/bg Type 7 RLE tile grids (8x8 tile size), and entities (classified into spawn, collectible, hazard, generic). `ExportMapImages` (via CLI `zip export-map` and TS `Zip_Go.exportMap`) renders per-room PNGs (`rooms/room_<name>.png`), a full-map composite PNG (`full_map.png`), and `manifest.json`. `--grid-only`/`gridOnly` forces the flat-color fallback renderer; `--celeste-dir`/`celesteDir` points at a Celeste install for real tile/decal asset rendering (autotiling via `ForegroundTiles.xml`/`BackgroundTiles.xml` + the Gameplay atlas), falling back to grid rendering automatically if assets don't resolve. See `docs/TheCelesteDesktop/Loenn.md` (tileset XML/atlas/decal format internals, current editor) and `docs/TheCelesteDesktop/Ahorn.md` (older-editor compat notes) before touching the real-asset rendering path.
@@ -218,7 +242,7 @@ A mod could be any type of mod like:
 
 ### Mod database: installed + historical (uninstalled) mods
 
-`DBMods.Mods_GetAllWithHistory()` (`src/libs/LocalMods.ts`) is the canonical "every mod this player has or has had" API — don't re-derive this join elsewhere. It combines:
+`DBMods.Mods_GetAllWithHistory()` (`src/libs/LocalMods.ts` / `src/domain/LocalMods.ts`) is the canonical "every mod this player has or has had" API — don't re-derive this join elsewhere. It combines:
 - Tier 1 (cheap, common case): mods already in the cached Everest scan (`EverestMods_GetAll`), split by a fresh `fs.exists(modPath)` check — catches uninstalls the scan cache doesn't know about yet without a full re-scan.
 - Tier 2 (fallback, Storage-cached via `HistoricalMods_GetAll`): mods the scan cache never saw at all, recovered from save files' `<LevelSetRecycleBin>`.
 
@@ -288,23 +312,23 @@ Category resolution (`DBMods.ResolveModCategory`) is Olympus (offline) first, Ma
 - BUN AS PACKAGE MANAGER. NPX AND NPM FORBIDDEN.
 - FORBIDDEN COMMANDS TO EXECUTE BY YOU EXCEPT UNLESS EXPLICITLY ASKED BY USER IN PROMPT.
   ```bash
-    bun x neu update # To fetch neutralino binaries. Almost NEVER NEEDED. Its a one-time command for whole dev project after clonning.
-    bun install               # installs deps, also runs `neu update` to fetch Neutralino binaries
-    bun run start              # You have no permission to start it, assume the dev is the one who can start it ONLY. UNLESS EXPLICITLY ASKED BY USER IN PROMPT.
-    bun run check              # svelte-check + tsc, no emit — run after any .ts/.svelte change
-    bun run lint               # biome check . — check only, no fixes
-    bun run lint:fix           # biome check . --write --unsafe — auto-fixes, run before AND after changes
-    bun test testing/go-utils-tests/Sqlite_Go_Usage.test.ts   # run a single test file
-    bun test -t "test name"    # run tests matching a name
-    bun run build              # full production build: Go CLI helpers -> neu build --embed-resources -> organize dist/prod/{windows,linux,mac}
-    bun run build:frontend     # vite build only (frontend assets, no Neutralino packaging)
+  bun x neu update # To fetch neutralino binaries. Almost NEVER NEEDED. Its a one-time command for whole dev project after cloning.
+  bun install               # installs deps, also runs `neu update` to fetch Neutralino binaries
+  bun run start              # You have no permission to start it, assume the dev is the one who can start it ONLY. UNLESS EXPLICITLY ASKED BY USER IN PROMPT.
+  bun run check              # svelte-check + tsc, no emit — run after any .ts/.svelte change
+  bun run lint               # biome check . — check only, no fixes
+  bun run lint:fix           # biome check . --write --unsafe — auto-fixes, run before AND after changes
+  bun test testing/go-utils-tests/Sqlite_Go_Usage.test.ts   # run a single test file
+  bun test -t "test name"    # run tests matching a name
+  bun run build              # full production build: Go CLI helpers -> neu build --embed-resources -> organize dist/prod/{windows,linux,mac}
+  bun run build:frontend     # vite build only (frontend assets, no Neutralino packaging)
   ```
 - COMMANDS TO EXECUTE AFTER CHANGES, IF WARNINGS | ERRORS, FIX ITERATE UNTIL ALL FIXED.
   ```bash
-    1. bun test                   # run all tests (Bun test runner, files in testing/**/*.test.ts)
-    2. bun check
-    3. bun lint:fix
-    4. bun check # (to check if lint:fix didn't broke anything)
+  1. bun test                   # run all tests (Bun test runner, files in testing/**/*.test.ts)
+  2. bun run check
+  3. bun run lint:fix
+  4. bun run check # (to check if lint:fix didn't break anything)
   ```
 
 
@@ -454,7 +478,6 @@ New native-helper features should follow the same shape: one Cobra subcommand, o
 All internal imports in the codebase use standard relative paths (e.g. `./` or `../`). Path aliases (`@core`, `@domain`, `@utils`, etc.) and `compilerOptions.paths` / `vite.config.ts` alias entries are completely removed to maintain clean, unambiguous resolution across `tsc`, `bun test`, Vite, and Svelte plugins.
 
 
-
 ## What I Like
 
 Clean minimal no-bloat code; Svelte 5 runes (killed the store layer); custom implementations over frameworks (router, canvas, DI wiring); platform abstraction (`IFileSystem`/`IOS` swapping) for fast tests + lean production; Go CLI for native ops (tiny self-contained binaries, no Electron bloat); Biome over ESLint+Prettier; TypeScript strict mode catching slop before runtime; Golden Layout for multi-pane management; dark glassmorphism themes; JSON-over-stdout for child process communication.
@@ -462,4 +485,3 @@ Clean minimal no-bloat code; Svelte 5 runes (killed the store layer); custom imp
 ## What I Don't Like
 
 Svelte 4 stores; Electron; npm/pnpm; over-abstraction ("just in case we swap it later"); unnecessary dependencies; verbose boilerplate; comments explaining what instead of why; magic strings without constants when reused; huge PRs (one concern per commit); frameworks that fight you.
-
